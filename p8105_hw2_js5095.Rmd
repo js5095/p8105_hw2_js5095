@@ -1,0 +1,8 @@
+---
+title: "p8105_hw2_js5095"
+author: Jianting Shi
+date: 2020-09-27
+output: github_document
+---
+
+
