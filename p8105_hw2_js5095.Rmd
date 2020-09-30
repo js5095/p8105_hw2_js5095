@@ -8,6 +8,7 @@ output: github_document
 ```{r}
 library(tidyverse)
 library(readxl)
+library(tidyr)
 ```
 
 ## Problem 1
@@ -50,7 +51,7 @@ precip_2018 =
   ) %>%
   janitor::clean_names() %>%
   drop_na(month) %>%
-  mutate(year = 2017) %>%
+  mutate(year = 2018) %>%
   relocate(year)
 ```
 
@@ -69,4 +70,94 @@ precip_df =
 left_join(precip_df, month_df, by = "month") %>%
   relocate(month_name, .after = "year")
 ```
+
+This dataset 'r 
+
+## Problem 2
+
+### 2.1 Read the NYC Transit dataset
+
+```{r}
+NYCTransit_df = (
+  read_csv(
+    "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>%
+  janitor::clean_names() %>%
+  select(line, station_name, station_latitude, station_longitude, starts_with("route"), entry, vending, entrance_type, ada) %>%
+  mutate(entry = recode(entry, "YES" = TRUE, "NO" = FALSE))
+)
+```
+
+The NYC Transit dataset now contains the following variables: `r names(NYCTransit_df)`. \
+The data cleaning steps includes extraction of `r ncol(NYCTransit_df)` columns out of the original dataset with names modified to lowercase and space replaced with "_", as well as the conversion of "entry" variables from character to logical. \
+Now the resulting dataframe contains `r nrow(NYCTransit_df)` rows and `r ncol(NYCTransit_df)` columns.
+
+### 2.2 Question 1: How many distinct stations are there?
+
+```{r}
+distinct_station = (
+  NYCTransit_df %>%
+ distinct(station_name, line) %>% 
+ nrow()
+)
+```
+
+There are `r distinct_station` distinct stations.
+
+### 2.3 Question 2: How many stations are ADA compliant?
+
+```{r}
+ADA_station = (
+  filter(NYCTransit_df, ada == TRUE) %>%
+  distinct(station_name, line) %>%
+  nrow()
+)
+```
+
+There are `r ADA_station` ADA compliant stations.
+
+### 2.4 Question 3: What proportion of station entrances / exits without vending allow entrance?
+
+```{r}
+entry_no_vending_entrance = (
+  NYCTransit_df %>%
+  filter(entry == TRUE & vending == "NO") %>%
+  nrow()
+)
+
+no_vending_entrance = (
+  NYCTransit_df %>%
+  filter(vending == "NO") %>%
+  nrow()
+)
+
+prop = entry_no_vending_entrance/no_vending_entrance
+```
+
+The proportion is `r prop`.
+
+### 2.5 Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? 
+
+```{r}
+NYCTransit_df %>% 
+  
+  pivot_longer(route1:route11, names_to = "route_number", values_to = "route_name") %>%
+  filter(route_name == 'A') %>% 
+  distinct(station_name, line) %>% 
+  nrow()
+```
+
+
+### 2.6 Of the stations that serve the A train, how many are ADA compliant?
+
+```{r}
+NYCTransit_df %>% 
+  pivot_longer(route1:route7, names_to = "route_number", values_to = "route_name") %>%
+  filter(route_name == 'A', ada == TRUE) %>% 
+  distinct(station_name, line) %>% 
+  nrow()
+```
+
+
+# Problem 3
+
 
