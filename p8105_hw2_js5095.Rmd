@@ -78,13 +78,12 @@ This dataset 'r
 ### 2.1 Read the NYC Transit dataset
 
 ```{r}
-NYCTransit_df = (
+NYCTransit_df = 
   read_csv(
     "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>%
   janitor::clean_names() %>%
   select(line, station_name, station_latitude, station_longitude, starts_with("route"), entry, vending, entrance_type, ada) %>%
   mutate(entry = recode(entry, "YES" = TRUE, "NO" = FALSE))
-)
 ```
 
 The NYC Transit dataset now contains the following variables: `r names(NYCTransit_df)`. \
@@ -159,5 +158,19 @@ NYCTransit_df %>%
 
 
 # Problem 3
+
+Read the FiveThirtyEight data
+
+```{r}
+polsmonth_df = 
+  read_csv(
+    "./data/fivethirtyeight_datasets/pols-month.csv") %>%
+  janitor::clean_names() %>%
+  separate(mon, into = c("year","month", "day")) %>%
+  mutate(month = as.numeric(as.factor(month))) %>%
+  mutate(month = month.name[month]) %>%
+  mutate(president = as.character(prez_gop)) %>%
+  mutate(president = recode(president, "0" = "dem", "1" = "gop"))
+```
 
 
