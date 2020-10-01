@@ -67,11 +67,15 @@ month_df =
 precip_df =
   bind_rows(precip_2017,precip_2018)
 
-left_join(precip_df, month_df, by = "month") %>%
+precip_df =
+  left_join(precip_df, month_df, by = "month") %>%
   relocate(month_name, .after = "year")
 ```
 
-This dataset 'r 
+This dataset contains information from the Mr. Trashwheel trash collector in Baltimore, Maryland. As trash enters the inner harbor, the trashwheel collects that trash, and stores it in a dumpster. The dataset contains information on year, month, and trash collected, include some specific kinds of trash. There are a total of `r nrow(trashwheel_df)` rows in our final dataset. Additional data sheets include month precipitation data. In this dataset:
+
+* The median number of sports balls found in a dumpster in 2017 was `r trashwheel_df %>% filter(year == 2017) %>% pull(sports_balls) %>% median()`
+* The total precipitation in 2018 was `r precip_df %>% filter(year == 2018) %>% pull(total) %>% sum()` inches.
 
 ## Problem 2
 
@@ -138,8 +142,7 @@ The proportion is `r prop`.
 
 ```{r}
 NYCTransit_df %>% 
-  
-  pivot_longer(route1:route11, names_to = "route_number", values_to = "route_name") %>%
+  pivot_longer(route1:route8, names_to = "route_number", values_to = "route_name") %>%
   filter(route_name == 'A') %>% 
   distinct(station_name, line) %>% 
   nrow()
@@ -157,20 +160,71 @@ NYCTransit_df %>%
 ```
 
 
-# Problem 3
+## Problem 3
 
-Read the FiveThirtyEight data
+### Read the pol-month.csv data from FiveThirtyEight 
 
 ```{r}
 polsmonth_df = 
   read_csv(
     "./data/fivethirtyeight_datasets/pols-month.csv") %>%
   janitor::clean_names() %>%
-  separate(mon, into = c("year","month", "day")) %>%
+  separate(mon, into = c("year", "month", "day")) %>%
   mutate(month = as.numeric(as.factor(month))) %>%
   mutate(month = month.name[month]) %>%
   mutate(president = as.character(prez_gop)) %>%
-  mutate(president = recode(president, "0" = "dem", "1" = "gop"))
+  mutate(president = recode(president, "0" = "dem", "1" = "gop")) %>%
+  select(-prez_dem, -prez_gop, -day)
 ```
 
+### Read the snp.csv data from FiveThirtyEight
 
+```{r}
+snp_df = 
+  read_csv(
+    "./data/fivethirtyeight_datasets/snp.csv") %>%
+  janitor::clean_names() %>%
+  separate(date, into = c("month", "day", "year")) %>%
+  select(-day) %>%
+  mutate(month = as.numeric(as.factor(month))) %>%
+  mutate(month = month.name[month]) %>%
+  relocate(year)
+```
+
+### Read the unemployment.csv data from FiveThirtyEight
+
+```{r}
+month_df = 
+  (tibble(
+    month = month.abb,
+    month_name = month.name
+  ))
+
+unemploy_df = 
+  read_csv(
+    "./data/fivethirtyeight_datasets/unemployment.csv") %>%
+  pivot_longer(Jan:Dec, names_to = "month", values_to = "rate")
+
+unempoly_df_join = (
+  left_join(unemploy_df, month_df, by = "month") %>%
+  select(-month) %>%
+  rename(month = month_name) %>%
+  janitor::clean_names() %>%
+  relocate(year, month)
+)
+```
+
+### Merge dataset snp into pols and merge unemployment into the result
+
+```{r}
+pols_snp_df =
+  left_join(polsmonth_df, snp_df, by = c("year", "month"))
+
+pols_snp_unemploy =
+  left_join(unemploy_df_join, pols_snp_df, by = c("year", "month"))
+
+```
+
+The "pols-month" dataset has `r ncol(polsmonth_df)` columns and `r nrow(polsmonth_df)` rows, containing data spanning between year of `r range(pull(polsmonth_df, year))` and variables including `r names(polsmonth_df)`. \
+The "snp" dataset has `r ncol(snp_df)` columns and `r nrow(snp_df)` rows, containing data spanning between year of `r range(pull(snp_df, year))` and variables including `r names(snp_df)`. \
+The "unemployment" dataset has `r ncol(unempoly_df_join)` columns and `r nrow(unempoly_df_join)` rows, containing data spanning between year of `r range(pull(unempoly_df_join, year))` and variables including `r names(unempoly_df_join)`. \
