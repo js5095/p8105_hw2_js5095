@@ -233,3 +233,4 @@ pols_snp_df =
 The "pols-month" dataset has `r ncol(polsmonth_df)` columns and `r nrow(polsmonth_df)` rows, containing data spanning between year of `r range(pull(polsmonth_df, year))` and variables including `r names(polsmonth_df)`. \
 The "snp" dataset has `r ncol(snp_df)` columns and `r nrow(snp_df)` rows, containing data spanning between year of `r range(pull(snp_df, year))` and variables including `r names(snp_df)`. \
 The "unemployment" dataset has `r ncol(unempoly_df_join)` columns and `r nrow(unempoly_df_join)` rows, containing data spanning between year of `r range(pull(unempoly_df_join, year))` and variables including `r names(unempoly_df_join)`. \
+The "unemployment" dataset has `r ncol(pols_snp_df)` columns and `r nrow(pols_snp_df)` rows, containing data spanning between year of `r range(pull(pols_snp_df, year))` and variables including `r names(pols_snp_df)`. \ 
