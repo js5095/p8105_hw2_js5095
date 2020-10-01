@@ -92,15 +92,15 @@ NYCTransit_df =
 
 The NYC Transit dataset now contains the following variables: `r names(NYCTransit_df)`. \
 The data cleaning steps includes extraction of `r ncol(NYCTransit_df)` columns out of the original dataset with names modified to lowercase and space replaced with "_", as well as the conversion of "entry" variables from character to logical. \
-Now the resulting dataframe contains `r nrow(NYCTransit_df)` rows and `r ncol(NYCTransit_df)` columns.
+Now the resulting dataframe has the dimension of `r dim(NYCTransit_df)`, containing `r nrow(NYCTransit_df)` rows and `r ncol(NYCTransit_df)` columns.
 
 ### 2.2 Question 1: How many distinct stations are there?
 
 ```{r}
 distinct_station = (
   NYCTransit_df %>%
- distinct(station_name, line) %>% 
- nrow()
+    distinct(station_name, line) %>% 
+    nrow()
 )
 ```
 
@@ -110,9 +110,10 @@ There are `r distinct_station` distinct stations.
 
 ```{r}
 ADA_station = (
-  filter(NYCTransit_df, ada == TRUE) %>%
-  distinct(station_name, line) %>%
-  nrow()
+  NYCTransit_df %>%
+    filter(ada == TRUE) %>%
+    distinct(station_name, line) %>%
+    nrow()
 )
 ```
 
@@ -123,14 +124,14 @@ There are `r ADA_station` ADA compliant stations.
 ```{r}
 entry_no_vending_entrance = (
   NYCTransit_df %>%
-  filter(entry == TRUE & vending == "NO") %>%
-  nrow()
+    filter(entry == TRUE & vending == "NO") %>%
+    nrow()
 )
 
 no_vending_entrance = (
   NYCTransit_df %>%
-  filter(vending == "NO") %>%
-  nrow()
+    filter(vending == "NO") %>%
+    nrow()
 )
 
 prop = entry_no_vending_entrance/no_vending_entrance
@@ -141,24 +142,28 @@ The proportion is `r prop`.
 ### 2.5 Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? 
 
 ```{r}
-NYCTransit_df %>% 
-  pivot_longer(route1:route8, names_to = "route_number", values_to = "route_name") %>%
+distinct_station_A =
+  NYCTransit_df %>% 
+  gather(key = route_number, value = route_name, route1:route11) %>%
   filter(route_name == 'A') %>% 
   distinct(station_name, line) %>% 
   nrow()
 ```
 
+There are `r distinct_station_A` distinct stations serve the A train.
 
 ### 2.6 Of the stations that serve the A train, how many are ADA compliant?
 
 ```{r}
-NYCTransit_df %>% 
-  pivot_longer(route1:route7, names_to = "route_number", values_to = "route_name") %>%
+ADA_compliant_A =
+  NYCTransit_df %>% 
+  gather(key = route_number, value = route_name, route1:route11) %>%
   filter(route_name == 'A', ada == TRUE) %>% 
   distinct(station_name, line) %>% 
   nrow()
 ```
 
+Of the stations that serve the A train, `r ADA_compliant_A` of them are ADA compliant.
 
 ## Problem 3
 
