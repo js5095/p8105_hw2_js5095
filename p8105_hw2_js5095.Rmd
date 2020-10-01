@@ -210,13 +210,14 @@ unemploy_df =
     "./data/fivethirtyeight_datasets/unemployment.csv") %>%
   pivot_longer(Jan:Dec, names_to = "month", values_to = "rate")
 
-unempoly_df_join = (
+unempoly_df_join = 
   left_join(unemploy_df, month_df, by = "month") %>%
   select(-month) %>%
   rename(month = month_name) %>%
   janitor::clean_names() %>%
-  relocate(year, month)
-)
+  relocate(year, month) %>%
+  mutate(
+    year = as.character(year))
 ```
 
 ### Merge dataset snp into pols and merge unemployment into the result
@@ -225,9 +226,8 @@ unempoly_df_join = (
 pols_snp_df =
   left_join(polsmonth_df, snp_df, by = c("year", "month"))
 
-pols_snp_unemploy =
-  left_join(unemploy_df_join, pols_snp_df, by = c("year", "month"))
-
+pols_snp_df =
+  left_join(pols_snp_df, unempoly_df_join, by = c("year", "month"))
 ```
 
 The "pols-month" dataset has `r ncol(polsmonth_df)` columns and `r nrow(polsmonth_df)` rows, containing data spanning between year of `r range(pull(polsmonth_df, year))` and variables including `r names(polsmonth_df)`. \
